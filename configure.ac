@@ -18,6 +18,8 @@ dnl
 dnl You should have received a copy of the GNU General Public License
 dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+AC_PREREQ([2.65])
+
 AC_INIT([GNU grep],
         m4_esyscmd([build-aux/git-version-gen .tarball-version]),
         [bug-grep@gnu.org])
@@ -65,10 +67,9 @@ ac_cv_path_EGREP=$EGREP
 AC_CONFIG_AUX_DIR(build-aux)
 AC_CONFIG_SRCDIR(src/grep.c)
 AC_DEFINE([GREP], 1, [We are building grep])
-AC_PREREQ(2.59)
 
 dnl Automake stuff.
-AM_INIT_AUTOMAKE([1.11 no-dist-gzip dist-xz color-tests parallel-tests])
+AM_INIT_AUTOMAKE([1.12a no-dist-gzip dist-xz color-tests])
 AM_SILENT_RULES([yes]) # make --enable-silent-rules the default.
 
 AC_CONFIG_HEADERS([config.h:config.hin])
