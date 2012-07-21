@@ -2,7 +2,8 @@
 *.exe
 *.o
 *~
-.deps
+.deps/
+.am/
 /ABOUT-NLS
 /GNUmakefile
 /ID
