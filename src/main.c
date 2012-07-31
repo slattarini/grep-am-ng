@@ -44,7 +44,6 @@
 #include "progname.h"
 #include "propername.h"
 #include "quote.h"
-#include "stat-size.h"
 #include "version-etc.h"
 #include "xalloc.h"
 #include "xstrtol.h"
@@ -443,9 +442,6 @@ clean_up_stdout (void)
 static int
 file_is_binary (char const *buf, size_t bufsize, int fd, struct stat const *st)
 {
-  #ifndef HAVE_STRUCT_STAT_ST_BLOCKS
-  enum { HAVE_STRUCT_STAT_ST_BLOCKS = 0 };
-  #endif
   #ifndef SEEK_HOLE
   enum { SEEK_HOLE = SEEK_END };
   #endif
@@ -461,8 +457,7 @@ file_is_binary (char const *buf, size_t bufsize, int fd, struct stat const *st)
     return 1;
 
   /* If the file has holes, it must contain a null byte somewhere.  */
-  if ((HAVE_STRUCT_STAT_ST_BLOCKS || SEEK_HOLE != SEEK_END)
-      && usable_st_size (st))
+  if (SEEK_HOLE != SEEK_END && usable_st_size (st))
     {
       off_t cur = bufsize;
       if (O_BINARY || fd == STDIN_FILENO)
@@ -472,28 +467,14 @@ file_is_binary (char const *buf, size_t bufsize, int fd, struct stat const *st)
             return 0;
         }
 
-      /* If the file has fewer blocks than would be needed to
-         represent its data, then it must have at least one hole.  */
-      if (HAVE_STRUCT_STAT_ST_BLOCKS)
-        {
-          off_t nonzeros_needed = st->st_size - cur + bufsize;
-          off_t full_blocks = nonzeros_needed / ST_NBLOCKSIZE;
-          int partial_block = 0 < nonzeros_needed % ST_NBLOCKSIZE;
-          if (ST_NBLOCKS (*st) < full_blocks + partial_block)
-            return 1;
-        }
-
       /* Look for a hole after the current location.  */
-      if (SEEK_HOLE != SEEK_END)
+      off_t hole_start = lseek (fd, cur, SEEK_HOLE);
+      if (0 <= hole_start)
         {
-          off_t hole_start = lseek (fd, cur, SEEK_HOLE);
-          if (0 <= hole_start)
-            {
-              if (lseek (fd, cur, SEEK_SET) < 0)
-                suppressible_error (filename, errno);
-              if (hole_start < st->st_size)
-                return 1;
-            }
+          if (lseek (fd, cur, SEEK_SET) < 0)
+            suppressible_error (filename, errno);
+          if (hole_start < st->st_size)
+            return 1;
         }
     }
 
