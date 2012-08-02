@@ -4,6 +4,7 @@
 *~
 .am/
 .deps/
+/.mk/
 /ABOUT-NLS
 /GNUmakefile
 /ID
