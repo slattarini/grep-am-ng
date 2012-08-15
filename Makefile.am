@@ -18,6 +18,8 @@
 AUTOMAKE_OPTIONS = gnu 1.10
 ACLOCAL_AMFLAGS = -I m4
 
+AM_DIST_FORMATS = xz
+
 SUBDIRS = po lib doc src tests gnulib-tests
 
 EXTRA_DIST =		\
